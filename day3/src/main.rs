@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fs, str::Chars};
+use std::fs;
 
 fn main() {
     let mut sum = 0;
@@ -13,32 +13,34 @@ fn read_file() -> String {
         .expect("Unable to read file")
 }
 
-fn max_power(s: &str) -> u32 {
-    let joltage_array: [(char, usize); 12];
-    let mut i = 0;
-    for (val, index) in note_index_sort(s.chars()).iter().rev() {
-        let lowest_index = index.iter().min().expect("");
-        joltage_array[i] = (*val, *lowest_index);
-        for (val2, index2) in note_index_sort(s.chars()).iter().rev() {
-            let second = *val2;
-            if index2.iter().max() > index.iter().min() {
-                let mut output = String::new();
-                output.push(first);
-                output.push(second);
-                return output.parse::<u32>().expect("unable to parse final int");
+fn max_power(s: &str) -> u64 {
+    // turn string into list of chars
+    let chars: Vec<char> = s.chars().collect();
+    // Get length of list
+    let n = chars.len();
+    // Allowed result len
+    let k = 12;
+
+    let mut result = String::new();
+    let mut start = 0;
+
+    // Set area available for digit prev_selection <- x -> digits remaining
+    for remaining in (1..=k).rev() {
+        let end = n - remaining;
+
+        let mut best_idx = start;
+        let mut best_char = chars[start];
+        for i in start..=end {
+            if chars[i] > best_char {
+                best_char = chars[i];
+                best_idx = i;
             }
         }
-    }
-    0
-}
 
-fn note_index_sort(b: Chars) -> BTreeMap<char, Vec<usize>> {
-    let mut byte_map: BTreeMap<char, Vec<usize>> = BTreeMap::new();
-    for (i, char) in b.enumerate() {
-        byte_map
-            .entry(char)
-            .and_modify(|vec_value| vec_value.push(i))
-            .or_insert(vec![i]);
+        result.push(best_char);
+        start = best_idx + 1;
     }
-    byte_map
+    chars.iter().for_each(|x| print!("{}", x));
+    print!("= {}\n\n", result);
+    result.parse().unwrap()
 }
